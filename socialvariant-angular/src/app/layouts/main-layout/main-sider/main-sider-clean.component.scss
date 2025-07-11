@@ -1,0 +1,92 @@
+// Clean Mobile Sidebar Styles - Testing Version
+.main-sider {
+  // Base styles
+  width: 280px;
+  min-height: calc(100vh - 64px);
+  background: #f8f9fa;
+  border-right: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease, left 0.3s ease;
+
+  // Desktop default
+  @media (min-width: 769px) {
+    position: relative;
+    left: 0;
+    top: 0;
+    z-index: 100;
+  }
+
+  // MOBILE STYLES - Priority Override
+  @media (max-width: 768px) {
+    position: fixed !important;
+    top: 64px !important;
+    left: -100vw !important;
+    width: 85vw !important;
+    max-width: 320px !important;
+    height: calc(100vh - 64px) !important;
+    z-index: 1001 !important;
+    background: white !important;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3) !important;
+
+    &.open {
+      left: 0 !important;
+      display: flex !important;
+      visibility: visible !important;
+    }
+  }
+
+  // DEVICE CLASS STYLES
+  &.device-mobile,
+  &.device-tablet {
+    @media (max-width: 768px) {
+      position: fixed !important;
+      top: 64px !important;
+      left: -100vw !important;
+      width: 85vw !important;
+      max-width: 320px !important;
+      height: calc(100vh - 64px) !important;
+      z-index: 1001 !important;
+      background: white !important;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3) !important;
+
+      &.open {
+        left: 0 !important;
+        display: flex !important;
+        visibility: visible !important;
+      }
+    }
+  }
+
+  // Content area
+  .sider-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    padding: 1.5rem 1rem;
+
+    @media (max-width: 768px) {
+      padding: 1rem !important;
+    }
+  }
+
+  // Collapse toggle (desktop only)
+  .collapse-toggle {
+    display: none;
+    
+    @media (min-width: 769px) {
+      display: block;
+      position: absolute;
+      top: 1rem;
+      right: -15px;
+      width: 30px;
+      height: 30px;
+      background: white;
+      border: 1px solid #e9ecef;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 101;
+    }
+  }
+}

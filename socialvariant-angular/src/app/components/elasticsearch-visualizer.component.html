@@ -1,0 +1,269 @@
+<div class="elasticsearch-dashboard">
+        <nz-layout>
+            <nz-header>
+                <div class="header-content">
+                    <h1>Elasticsearch Data Visualizer</h1>
+                    <nz-select [(ngModel)]="selectedIndex" (ngModelChange)="onIndexChange()" nzPlaceHolder="Select an Index"
+                        nzAllowClear style="width: 300px;">
+                        <nz-option *ngFor="let index of indexes" [nzValue]="index.key" [nzLabel]="index.name">
+                        </nz-option>
+                    </nz-select>
+                </div>
+            </nz-header>
+    
+            <nz-content style="padding: 24px;">
+                <!-- Search and Filter Section -->
+                <nz-card [nzTitle]="'Search & Filter'" *ngIf="selectedIndex" style="margin-bottom: 16px;">
+                    <div class="search-section">
+                        <!-- Query Search with Suggestions -->
+                        <div class="query-search">
+                            <nz-auto-complete [(ngModel)]="searchQuery"
+                                (ngModelChange)="onSearchInput($event)" (ngModelChange)="onSearchSelect($event)" style="width: 100%;">
+                                <input nz-input placeholder="Search query (e.g., status:pending OR title:*meeting*)"
+                                    (keyup.enter)="executeSearch()" style="width: 100%;">
+                                <nz-auto-option *ngFor="let suggestion of searchSuggestions" [nzValue]="suggestion">
+                                    {{ suggestion }}
+                                </nz-auto-option>
+                            </nz-auto-complete>
+                        </div>
+    
+                        <!-- Advanced Filters -->
+                        <div class="filters-section">
+                            <nz-collapse>
+                                <nz-collapse-panel nzHeader="Advanced Filters" [nzActive]="showAdvancedFilters">
+                                    <div class="filter-builder">
+                                        <div *ngFor="let filter of filters; let i = index" class="filter-row">
+                                            <nz-select [(ngModel)]="filter.field" nzPlaceHolder="Field"
+                                                style="width: 200px; margin-right: 8px;">
+                                                <nz-option *ngFor="let field of getFieldsForIndex(selectedIndex)"
+                                                    [nzValue]="field.key" [nzLabel]="field.label">
+                                                </nz-option>
+                                            </nz-select>
+    
+                                            <nz-select [(ngModel)]="filter.operator" nzPlaceHolder="Operator"
+                                                style="width: 120px; margin-right: 8px;">
+                                                <nz-option nzValue="equals" nzLabel="Equals"></nz-option>
+                                                <nz-option nzValue="contains" nzLabel="Contains"></nz-option>
+                                                <nz-option nzValue="starts_with" nzLabel="Starts with"></nz-option>
+                                                <nz-option nzValue="range" nzLabel="Range"></nz-option>
+                                                <nz-option nzValue="exists" nzLabel="Exists"></nz-option>
+                                                <nz-option nzValue="not_exists" nzLabel="Not exists"></nz-option>
+                                            </nz-select>
+    
+                                            <ng-container [ngSwitch]="getFieldType(filter.field)">
+                                                <nz-date-picker *ngSwitchCase="'date'" [(ngModel)]="filter.value"
+                                                    style="width: 200px; margin-right: 8px;">
+                                                </nz-date-picker>
+                                                <nz-select *ngSwitchCase="'select'" [(ngModel)]="filter.value"
+                                                    style="width: 200px; margin-right: 8px;">
+                                                    <nz-option *ngFor="let option of getFieldOptions(filter.field)"
+                                                        [nzValue]="option" [nzLabel]="option">
+                                                    </nz-option>
+                                                </nz-select>
+                                                <input *ngSwitchDefault nz-input [(ngModel)]="filter.value"
+                                                    placeholder="Value" style="width: 200px; margin-right: 8px;">
+                                            </ng-container>
+    
+                                            <button nz-button nzDanger nzSize="small" type="button" title="Remove Filter" (click)="removeFilter(i)">
+                                                <i nz-icon nzType="delete"></i>
+                                            </button>
+                                        </div>
+    
+                                        <div class="filter-actions">
+                                            <button nz-button nzType="dashed" (click)="addFilter()">
+                                                <i nz-icon nzType="plus"></i> Add Filter
+                                            </button>
+                                            <button nz-button nzType="primary" (click)="applyFilters()"
+                                                style="margin-left: 8px;">
+                                                Apply Filters
+                                            </button>
+                                            <button nz-button (click)="clearFilters()" style="margin-left: 8px;">
+                                                Clear All
+                                            </button>
+                                        </div>
+                                    </div>
+                                </nz-collapse-panel>
+                            </nz-collapse>
+                        </div>
+    
+                        <!-- Quick Actions -->
+                        <div class="quick-actions">
+                            <div nz-button-group>
+                                <button nz-button nzType="primary" (click)="executeSearch()">
+                                    <i nz-icon nzType="search"></i> Search
+                                </button>
+                                <button nz-button nzType="default" (click)="clearSearch()">
+                                    <i nz-icon nzType="clear"></i> Clear
+                                </button>
+                                <button nz-button nzType="default" (click)="loadData()">
+                                    <i nz-icon nzType="reload"></i> Refresh
+                                </button>
+                                <button nz-button nzType="primary" (click)="showCreateModal()">
+                                    <i nz-icon nzType="plus"></i> Create New
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </nz-card>
+    
+                <!-- Statistics Cards -->
+                <div class="stats-cards" *ngIf="selectedIndex && !loading">
+                    <nz-row [nzGutter]="16">
+                        <nz-col [nzSpan]="6">
+                            <nz-card>
+                                <nz-statistic [nzValue]="totalDocuments" nzTitle="Total Documents"
+                                    [nzValueStyle]="{ color: '#3f8600' }">
+                                </nz-statistic>
+                            </nz-card>
+                        </nz-col>
+                        <nz-col [nzSpan]="6">
+                            <nz-card>
+                                <nz-statistic [nzValue]="filteredDocuments" nzTitle="Filtered Results"
+                                    [nzValueStyle]="{ color: '#1890ff' }">
+                                </nz-statistic>
+                            </nz-card>
+                        </nz-col>
+                        <nz-col [nzSpan]="6">
+                            <nz-card>
+                                <nz-statistic [nzValue]="queryTime" nzTitle="Query Time (ms)"
+                                    [nzValueStyle]="{ color: '#722ed1' }">
+                                </nz-statistic>
+                            </nz-card>
+                        </nz-col>
+                        <nz-col [nzSpan]="6">
+                            <nz-card>
+                                <nz-statistic [nzValue]="activeFilters" nzTitle="Active Filters"
+                                    [nzValueStyle]="{ color: '#eb2f96' }">
+                                </nz-statistic>
+                            </nz-card>
+                        </nz-col>
+                    </nz-row>
+                </div>
+    
+                <!-- Data Table -->
+                <nz-card [nzTitle]="'Documents (' + documents.length + ')'" *ngIf="selectedIndex">
+                    <nz-table #basicTable [nzData]="documents" [nzLoading]="loading" [nzScroll]="{ x: '1200px' }"
+                        [nzPageSize]="20" [nzShowSizeChanger]="true" [nzShowQuickJumper]="true"
+                        [nzShowTotal]="totalTemplate">
+    
+                        <thead>
+                            <tr>
+                                <th nzWidth="100px">ID</th>
+                                <th *ngFor="let field of getDisplayFields(selectedIndex)" [nzSortFn]="getSortFn(field.key)"
+                                    [nzShowSort]="true">
+                                    {{field.label}}
+                                </th>
+                                <th nzWidth="150px" nzRight>Actions</th>
+                            </tr>
+                        </thead>
+    
+                        <tbody>
+                            <tr *ngFor="let doc of basicTable.data">
+                                <td>
+                                    <nz-tag [nzColor]="'blue'">{{doc._id.substring(0, 8)}}</nz-tag>
+                                </td>
+                                <td *ngFor="let field of getDisplayFields(selectedIndex)">
+                                    <ng-container [ngSwitch]="field.type">
+                                        <nz-tag *ngSwitchCase="'select'" [nzColor]="getTagColor(doc._source[field.key])">
+                                            {{doc._source[field.key]}}
+                                        </nz-tag>
+                                        <span *ngSwitchCase="'date'">
+                                            {{formatDate(doc._source[field.key])}}
+                                        </span>
+                                        <span *ngSwitchDefault
+                                            [innerHTML]="formatFieldValue(doc._source[field.key], field.type)">
+                                        </span>
+                                    </ng-container>
+                                </td>
+                                <td nzRight>
+                                    <div nz-button-group>
+                                        <button nz-button nzType="primary" nzSize="small" (click)="viewDocument(doc)">
+                                            <i nz-icon nzType="eye"></i>
+                                        </button>
+                                        <button nz-button nzType="default" nzSize="small" (click)="editDocument(doc)">
+                                            <i nz-icon nzType="edit"></i>
+                                        </button>
+                                        <button nz-button nzDanger nzSize="small" (click)="deleteDocument(doc._id)">
+                                            <i nz-icon nzType="delete"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </nz-table>
+    
+                    <ng-template #totalTemplate let-total>
+                        Total {{ total }} items
+                    </ng-template>
+                </nz-card>
+    
+                <!-- Create/Edit Modal -->
+                <nz-modal [(nzVisible)]="isModalVisible" [nzTitle]="modalTitle"
+                    [nzOkText]="editingDocument ? 'Update' : 'Create'" [nzCancelText]="'Cancel'" [nzWidth]="800"
+                    (nzOnOk)="saveDocument()" (nzOnCancel)="closeModal()">
+    
+                    <div class="document-form">
+                        <nz-form nzLayout="vertical" [formGroup]="documentForm">
+                            <nz-row [nzGutter]="16">
+                                <nz-col [nzSpan]="12" *ngFor="let field of getFieldsForIndex(selectedIndex)">
+                                    <nz-form-item>
+                                        <nz-form-label [nzRequired]="field.required">{{field.label}}</nz-form-label>
+                                        <nz-form-control>
+                                            <ng-container [ngSwitch]="field.type">
+                                                <nz-date-picker *ngSwitchCase="'date'" [(ngModel)]="formData[field.key]"
+                                                    nzShowTime style="width: 100%;">
+                                                </nz-date-picker>
+                                                <nz-select *ngSwitchCase="'select'" [(ngModel)]="formData[field.key]"
+                                                    nzPlaceHolder="Select {{field.label}}" style="width: 100%;">
+                                                    <nz-option *ngFor="let option of field.options" [nzValue]="option"
+                                                        [nzLabel]="option">
+                                                    </nz-option>
+                                                </nz-select>
+                                            <textarea *ngSwitchCase="'textarea'" nz-input
+                                                [(ngModel)]="formData[field.key]" [placeholder]="field.label" [title]="field.label" rows="4">
+                                            </textarea>
+                                                <input *ngSwitchDefault nz-input [(ngModel)]="formData[field.key]"
+                                                    [placeholder]="field.label">
+                                            </ng-container>
+                                        </nz-form-control>
+                                    </nz-form-item>
+                                </nz-col>
+                            </nz-row>
+                        </nz-form>
+                    </div>
+                </nz-modal>
+    
+                <!-- View Document Modal -->
+                <nz-modal [(nzVisible)]="isViewModalVisible" nzTitle="Document Details" [nzFooter]="null" [nzWidth]="800"
+                    (nzOnCancel)="closeViewModal()">
+    
+                    <div class="document-view" *ngIf="viewingDocument">
+                        <nz-descriptions nzBordered [nzColumn]="1">
+                            <nz-descriptions-item nzTitle="Document ID">
+                                <nz-tag nzColor="blue">{{viewingDocument._id}}</nz-tag>
+                            </nz-descriptions-item>
+                            <nz-descriptions-item *ngFor="let field of getFieldsForIndex(selectedIndex)"
+                                [nzTitle]="field.label">
+                                <ng-container [ngSwitch]="field.type">
+                                    <nz-tag *ngSwitchCase="'select'"
+                                        [nzColor]="getTagColor(viewingDocument._source[field.key])">
+                                        {{viewingDocument._source[field.key]}}
+                                    </nz-tag>
+                                    <span *ngSwitchCase="'date'">
+                                        {{formatDate(viewingDocument._source[field.key])}}
+                                    </span>
+                                    <div *ngSwitchCase="'textarea'" style="white-space: pre-wrap;">
+                                        {{viewingDocument._source[field.key]}}
+                                    </div>
+                                    <span *ngSwitchDefault>
+                                        {{viewingDocument._source[field.key]}}
+                                    </span>
+                                </ng-container>
+                            </nz-descriptions-item>
+                        </nz-descriptions>
+                    </div>
+                </nz-modal>
+            </nz-content>
+        </nz-layout>
+        </div>
+

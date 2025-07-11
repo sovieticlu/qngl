@@ -1,0 +1,267 @@
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 1rem;
+}
+
+.login-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: 3rem;
+  width: 100%;
+  max-width: 420px;
+  
+  @media (max-width: 480px) {
+    padding: 2rem 1.5rem;
+    margin: 1rem;
+  }
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  
+  h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a202c;
+  }
+  
+  p {
+    margin: 0;
+    color: #718096;
+    font-size: 1rem;
+  }
+}
+
+.login-form {
+  .form-group {
+    margin-bottom: 1.5rem;
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #2d3748;
+      font-size: 0.875rem;
+    }
+    
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+      
+      &:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+      
+      &.error {
+        border-color: #e53e3e;
+        box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+      }
+      
+      &::placeholder {
+        color: #a0aec0;
+      }
+    }
+  }
+  
+  .checkbox-group {
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: #4a5568;
+      
+      input[type="checkbox"] {
+        margin: 0;
+        margin-right: 0.5rem;
+        width: 1rem;
+        height: 1rem;
+        accent-color: #667eea;
+      }
+    }
+  }
+  
+  .error-message {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #e53e3e;
+    display: flex;
+    align-items: center;
+    
+    &::before {
+      content: '⚠️';
+      margin-right: 0.25rem;
+    }
+  }
+}
+
+.login-btn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 1.5rem;
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .loading-spinner {
+    display: inline-flex;
+    align-items: center;
+    
+    &::after {
+      content: '';
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 0.5rem;
+    }
+  }
+}
+
+.form-footer {
+  text-align: center;
+  
+  p {
+    margin: 0;
+    color: #718096;
+    font-size: 0.875rem;
+    
+    a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.demo-credentials {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+  
+  h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2d3748;
+    text-align: center;
+  }
+  
+  .demo-account {
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: #4a5568;
+    
+    strong {
+      color: #2d3748;
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Dark theme support
+[data-theme="dark"] {
+  .login-card {
+    background: #1a202c;
+    color: #e2e8f0;
+    
+    .login-header {
+      h1 {
+        color: #e2e8f0;
+      }
+      
+      p {
+        color: #a0aec0;
+      }
+    }
+    
+    .form-group {
+      label {
+        color: #e2e8f0;
+      }
+      
+      input[type="email"],
+      input[type="password"] {
+        background: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+        
+        &::placeholder {
+          color: #718096;
+        }
+        
+        &:focus {
+          border-color: #667eea;
+        }
+      }
+    }
+    
+    .checkbox-group .checkbox-label {
+      color: #e2e8f0;
+    }
+    
+    .demo-credentials {
+      border-top-color: #4a5568;
+      
+      h3 {
+        color: #e2e8f0;
+      }
+      
+      .demo-account {
+        background: #2d3748;
+        border-color: #4a5568;
+        color: #a0aec0;
+        
+        strong {
+          color: #e2e8f0;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,339 @@
+.services-demo {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--background);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.demo-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(45deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+  }
+}
+
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+.demo-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+  }
+  
+  h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.4rem;
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 0.5rem;
+  }
+  
+  h4 {
+    margin: 1rem 0 0.5rem 0;
+    color: var(--text);
+    font-size: 1rem;
+  }
+}
+
+.service-status {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  
+  p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    
+    strong {
+      color: var(--primary);
+      font-weight: 600;
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  
+  button {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-1px);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+    
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: var(--surface);
+      color: var(--text-secondary);
+      
+      &:hover {
+        transform: none;
+      }
+    }
+    
+    &.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    
+    &.danger {
+      background: #dc3545;
+      color: white;
+      border-color: #dc3545;
+      
+      &:hover {
+        background: #c82333;
+      }
+    }
+  }
+}
+
+.theme-demo {
+  .theme-btn {
+    &.light.active {
+      background: #ffd700;
+      color: #333;
+    }
+    
+    &.dark.active {
+      background: #2d3748;
+      color: white;
+    }
+    
+    &.auto.active {
+      background: linear-gradient(45deg, #ffd700 50%, #2d3748 50%);
+      color: white;
+    }
+  }
+}
+
+.language-demo {
+  .language-selector {
+    margin: 1rem 0;
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+  }
+  
+  .translation-demo {
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0;
+      
+      li {
+        padding: 0.25rem 0;
+        font-size: 0.85rem;
+        
+        code {
+          background: var(--background);
+          padding: 0.2rem 0.4rem;
+          border-radius: 4px;
+          font-family: 'Monaco', 'Menlo', monospace;
+          color: var(--accent);
+        }
+      }
+    }
+  }
+}
+
+.pwa-demo {
+  .pwa-capabilities {
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0;
+      
+      li {
+        padding: 0.25rem 0;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+    }
+  }
+}
+
+.night-mode-demo {
+  .night-mode-config {
+    .config-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+      font-size: 0.9rem;
+      
+      label {
+        min-width: 120px;
+        font-weight: 500;
+      }
+      
+      input[type="checkbox"] {
+        margin-right: 0.5rem;
+      }
+      
+      input[type="time"] {
+        padding: 0.25rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: var(--surface);
+        color: var(--text);
+      }
+      
+      input[type="range"] {
+        flex: 1;
+        margin: 0 0.5rem;
+      }
+      
+      span {
+        min-width: 40px;
+        text-align: right;
+        font-weight: 600;
+        color: var(--primary);
+      }
+    }
+  }
+}
+
+.store-demo {
+  .store-state {
+    pre {
+      background: var(--background);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      font-size: 0.75rem;
+      line-height: 1.4;
+      overflow-x: auto;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Monaco', 'Menlo', monospace;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  }
+}
+
+// Dark mode specific styles
+.night-mode {
+  .demo-card {
+    filter: sepia(20%) saturate(0.8) hue-rotate(180deg);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .services-demo {
+    padding: 1rem;
+  }
+  
+  .demo-header h1 {
+    font-size: 2rem;
+  }
+  
+  .demo-card {
+    padding: 1rem;
+  }
+  
+  .actions {
+    button {
+      flex: 1;
+      min-width: 120px;
+    }
+  }
+  
+  .night-mode-config .config-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    
+    label {
+      min-width: auto;
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      margin: 0;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .demo-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .actions {
+    flex-direction: column;
+    
+    button {
+      width: 100%;
+    }
+  }
+}

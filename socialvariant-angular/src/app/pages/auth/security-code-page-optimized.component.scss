@@ -1,0 +1,150 @@
+// Security Code Page Styles - Optimized
+.security-code-page {
+  .auth-subtitle strong {
+    color: #3b82f6;
+    font-weight: 600;
+  }
+
+  .code-input-container {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+
+    input {
+      width: 3rem;
+      height: 3rem;
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 600;
+      border: 2px solid #e5e7eb;
+      border-radius: 6px;
+      background: #ffffff;
+      transition: border-color 0.2s ease;
+
+      &:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      &.filled {
+        border-color: #10b981;
+        background: #f0fdf4;
+      }
+
+      &.error {
+        border-color: #ef4444;
+        background: #fef2f2;
+      }
+    }
+  }
+
+  .resend-container {
+    text-align: center;
+    margin-top: 1.5rem;
+
+    .resend-text {
+      color: #6b7280;
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .resend-button {
+      background: none;
+      border: none;
+      color: #3b82f6;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+
+      &:hover {
+        color: #2563eb;
+      }
+
+      &:disabled {
+        color: #9ca3af;
+        cursor: not-allowed;
+        text-decoration: none;
+      }
+    }
+
+    .countdown {
+      color: #ef4444;
+      font-weight: 600;
+    }
+  }
+
+  .verification-status {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    &.success {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    &.error {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+  }
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+  .security-code-page {
+    .code-input-container {
+      gap: 0.5rem;
+
+      input {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+// Dark theme
+[data-theme="dark"] .security-code-page {
+  .code-input-container input {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+
+    &:focus {
+      border-color: #60a5fa;
+      background: #374151;
+    }
+
+    &.filled {
+      border-color: #34d399;
+      background: #064e3b;
+    }
+
+    &.error {
+      border-color: #f87171;
+      background: #7f1d1d;
+    }
+  }
+
+  .verification-status {
+    &.success {
+      background: #064e3b;
+      color: #a7f3d0;
+      border-color: #047857;
+    }
+
+    &.error {
+      background: #7f1d1d;
+      color: #fca5a5;
+      border-color: #dc2626;
+    }
+  }
+}

@@ -1,0 +1,543 @@
+// Main Layout Component Styles
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  max-width: none;
+  background: #ffffff;
+
+  .layout-container {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    min-height: calc(100vh - 64px); // Account for header height
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0; // Prevent flex item from overflowing
+      width: 100%; // Ensure full width usage
+      background: #ffffff;
+
+      .content-wrapper {
+        flex: 1;
+        padding: 2rem;
+        width: 100%;
+        max-width: none; // Remove any width restrictions
+        overflow-x: auto;
+
+        // Ensure router-outlet content fills the space
+        > * {
+          width: 100%;
+          max-width: none;
+        }
+      }
+    }
+  }
+}
+
+// Mobile responsive adjustments
+@media (max-width: 768px) {
+  .main-layout {
+    .layout-container {
+      .main-content {
+        .content-wrapper {
+          padding: 1.5rem 1rem;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .main-layout {
+    .layout-container {
+      .main-content {
+        .content-wrapper {
+          padding: 1rem 0.75rem;
+        }
+      }
+    }
+  }
+}
+
+// Dark theme support
+[data-theme="dark"] {
+  .main-layout {
+    background: #1a202c;
+
+    .layout-container {
+      .main-content {
+        background: #1a202c;
+      }
+    }
+  }
+}
+
+// Loading state
+.main-layout.loading {
+  .main-content {
+    .content-wrapper {
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+
+      &::after {
+        content: 'Loading...';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1001;
+        font-weight: 600;
+        color: #007bff;
+      }
+    }
+  }
+}
+
+// Mobile backdrop for sidebar
+.mobile-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-backdrop {
+    display: none; // Hide backdrop on desktop
+  }
+}
+
+// Viewport-based responsive styles
+.main-layout {
+  // Device-specific classes from ViewportService
+  &.device-mobile {
+    .layout-container {
+      .main-content {
+        margin-left: 0; // No sidebar space on mobile
+
+        .content-wrapper {
+          padding: 1rem 0.75rem;
+        }
+
+        &.sidebar-collapsed {
+          margin-left: 0; // Override collapsed state on mobile
+        }
+      }
+    }
+  }
+
+  &.device-tablet {
+    .layout-container {
+      .main-content {
+        .content-wrapper {
+          padding: 1.5rem 1rem;
+        }
+      }
+    }
+  }
+
+  &.device-desktop {
+    .layout-container {
+      .main-content {
+        // Remove margin-left and let flexbox handle the layout
+        flex: 1;
+        width: 100%;
+        min-width: 0; // Important for flex item to shrink properly
+        transition: all 0.3s ease;
+
+        .content-wrapper {
+          padding: 2rem;
+          width: 100%;
+          max-width: none;
+        }
+      }
+    }
+  }
+
+  &.device-bigScreen {
+    .layout-container {
+      .main-content {
+        // Remove margin-left and let flexbox handle the layout
+        flex: 1;
+        width: 100%;
+        min-width: 0; // Important for flex item to shrink properly
+
+        .content-wrapper {
+          padding: 3rem 4rem; // More generous padding for big screens
+          // Full width utilization for big screens
+          width: 100%;
+          max-width: none;
+
+          // Enhanced spacing and layout for big screens
+          > * {
+            width: 100%;
+            max-width: none;
+          }
+
+          // Better container behavior for wide screens
+          .container,
+          .content-container,
+          .content,
+          .page-content {
+            width: 100%;
+            max-width: none !important;
+            margin: 0;
+          }
+
+          // Enhanced grid layouts for big screens
+          .grid,
+          .responsive-grid {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+          }
+
+          // Better spacing for components
+          .component,
+          .card,
+          .section {
+            margin-bottom: 2rem;
+          }
+        }
+      }
+
+      // Ensure sidebar takes full height on big screens
+      .main-sider {
+        min-height: 100vh;
+        width: 350px; // Wider sidebar for big screens
+      }
+    }
+
+    // Enhanced header spacing for big screens
+    .main-header {
+      .header-container {
+        padding: 0 4rem; // Even more padding for big screens
+        max-width: none; // Remove any width restrictions
+      }
+    }
+  }
+
+  // Ultra-wide screens (4K and beyond)
+  @media (min-width: 1920px) {
+    .main-layout.device-bigScreen {
+      .layout-container {
+        .main-content {
+          margin-left: 450px; // Extra wide sidebar margin for ultra-wide screens
+
+          &.sidebar-collapsed {
+            margin-left: 140px;
+          }
+
+          .content-wrapper {
+            padding: 4rem 8rem; // Very generous padding for ultra-wide screens
+            
+            // Ultra-wide specific layouts
+            .responsive-grid {
+              grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+              gap: 4rem;
+            }
+
+            // Better typography spacing for ultra-wide
+            h1, h2, h3 {
+              margin-bottom: 2.5rem;
+            }
+
+            p, .text-content {
+              max-width: 85ch; // Optimal reading width even on ultra-wide screens
+              margin-bottom: 1.75rem;
+            }
+
+            // Enhanced component spacing for ultra-wide
+            .card, .component, .section {
+              margin-bottom: 3rem;
+            }
+
+            // Better form layouts for ultra-wide
+            .form-container,
+            .form-section {
+              max-width: 120ch;
+              margin: 0 auto 3rem auto;
+            }
+          }
+        }
+
+        .main-sider {
+          width: 450px; // Ultra-wide sidebar
+        }
+      }
+
+      .main-header {
+        .header-container {
+          padding: 0 8rem; // Ultra-wide header padding
+        }
+      }
+    }
+  }
+
+  // 5K and ultra-ultra-wide screens (2560px+)
+  @media (min-width: 2560px) {
+    .main-layout.device-bigScreen {
+      .layout-container {
+        .main-content {
+          margin-left: 500px; // Maximum sidebar margin for 5K+ screens
+
+          &.sidebar-collapsed {
+            margin-left: 160px;
+          }
+
+          .content-wrapper {
+            padding: 5rem 12rem; // Maximum padding for 5K+ screens
+            
+            // 5K+ specific layouts
+            .responsive-grid {
+              grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+              gap: 5rem;
+            }
+
+            // Enhanced spacing for 5K+ screens
+            .card, .component, .section {
+              margin-bottom: 4rem;
+            }
+
+            // Optimal form layouts for 5K+ screens
+            .form-container,
+            .form-section {
+              max-width: 140ch;
+              margin: 0 auto 4rem auto;
+            }
+
+            // Enhanced table layouts for ultra-wide
+            .table-container {
+              width: 100%;
+              overflow-x: visible;
+            }
+
+            table {
+              width: 100%;
+              max-width: none;
+            }
+          }
+        }
+
+        .main-sider {
+          width: 500px; // Maximum sidebar width for 5K+ screens
+        }
+      }
+
+      .main-header {
+        .header-container {
+          padding: 0 12rem; // Maximum header padding for 5K+ screens
+        }
+      }
+    }
+  }
+
+  // Orientation-specific styles
+  &.orientation-portrait {
+    // Styles for portrait orientation
+    &.device-mobile,
+    &.device-tablet {
+      .layout-container {
+        .main-content {
+          .content-wrapper {
+            // More vertical padding in portrait mode
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+          }
+        }
+      }
+    }
+  }
+
+  &.orientation-landscape {
+    // Styles for landscape orientation
+    &.device-mobile,
+    &.device-tablet {
+      .layout-container {
+        .main-content {
+          .content-wrapper {
+            // More horizontal padding in landscape mode
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+          }
+        }
+      }
+    }
+  }
+
+  // Touch-specific styles
+  &.touch {
+    .layout-container {
+      .main-content {
+        .content-wrapper {
+          // Larger touch targets and spacing for touch devices
+          button,
+          .clickable {
+            min-height: 44px; // Apple's recommended touch target size
+            min-width: 44px;
+          }
+        }
+      }
+    }
+  }
+
+  &.no-touch {
+    .layout-container {
+      .main-content {
+        .content-wrapper {
+          // Smaller, more dense UI for non-touch devices
+          button,
+          .clickable {
+            min-height: 32px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Mobile backdrop responsive behavior
+.mobile-backdrop {
+  // Only show on mobile and tablet devices
+  .device-mobile &,
+  .device-tablet & {
+    display: block;
+  }
+
+  .device-desktop &,
+  .device-bigScreen & {
+    display: none;
+  }
+}
+
+// Ultra-wide device classes (additional to bigScreen)
+.main-layout {
+  &.device-ultraWide {
+    .layout-container {
+      .main-content {
+        // Remove margin-left and let flexbox handle the layout
+        flex: 1;
+        width: 100%;
+        min-width: 0; // Important for flex item to shrink properly
+
+        .content-wrapper {
+          padding: 4rem 8rem; // Maximum ultra-wide padding
+          width: 100%;
+          max-width: none;
+          
+          // Ultra-wide grid enhancements
+          .responsive-grid {
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 4rem;
+          }
+
+          // Enhanced component spacing
+          .component,
+          .card,
+          .section {
+            margin-bottom: 3rem;
+          }
+
+          // Better form handling for ultra-wide
+          .form-container {
+            max-width: 120ch;
+            margin: 0 auto;
+          }
+        }
+      }
+
+      .main-sider {
+        width: 450px; // Ultra-wide sidebar
+      }
+    }
+
+    .main-header {
+      .header-container {
+        padding: 0 8rem;
+      }
+    }
+  }
+
+  &.device-ultraUltraWide {
+    .layout-container {
+      .main-content {
+        // Remove margin-left and let flexbox handle the layout
+        flex: 1;
+        width: 100%;
+        min-width: 0; // Important for flex item to shrink properly
+
+        .content-wrapper {
+          padding: 5rem 12rem; // Maximum padding for 5K+ screens
+          width: 100%;
+          max-width: none;
+          
+          // Maximum grid enhancements
+          .responsive-grid {
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 5rem;
+          }
+
+          // Maximum component spacing
+          .component,
+          .card,
+          .section {
+            margin-bottom: 4rem;
+          }
+
+          // Enhanced form handling for 5K+ screens
+          .form-container {
+            max-width: 140ch;
+            margin: 0 auto;
+          }
+
+          // Enhanced table handling for ultra-wide
+          .table-responsive {
+            overflow-x: visible;
+          }
+
+          table {
+            width: 100%;
+            table-layout: auto;
+          }
+        }
+      }
+
+      .main-sider {
+        width: 500px; // Maximum sidebar width for 5K+ screens
+      }
+    }
+
+    .main-header {
+      .header-container {
+        padding: 0 12rem;
+      }
+    }
+  }
+}

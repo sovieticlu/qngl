@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dropdown Debug Test</title>
+    <style>
+        body { margin: 20px; font-family: Arial, sans-serif; }
+        .test-container { border: 1px solid #ccc; padding: 20px; margin: 20px 0; }
+        .debug-info { background: #f5f5f5; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Language Dropdown Debug Test</h1>
+    
+    <div class="test-container">
+        <h3>To test the dropdown:</h3>
+        <ol>
+            <li>Start the Angular dev server: <code>npm start</code></li>
+            <li>Open the browser dev tools (F12)</li>
+            <li>Look at the Console tab</li>
+            <li>Click the language dropdown button in the header</li>
+            <li>Check if you see debug messages like:</li>
+        </ol>
+        
+        <div class="debug-info">
+            <strong>Expected console output:</strong><br>
+            - "LanguageSelector initializing..."<br>
+            - "Current language: {flag: '🇺🇸', nativeName: 'English', ...}"<br>
+            - "Button clicked! Current state: false"<br>
+            - "After toggle, new state: true"<br>
+            - "Dropdown is now open"
+        </div>
+        
+        <div class="debug-info">
+            <strong>If you don't see these messages:</strong><br>
+            - The click event is not being triggered<br>
+            - Check if the component is properly loaded<br>
+            - Check for any JavaScript errors in the console
+        </div>
+        
+        <div class="debug-info">
+            <strong>If you see the messages but no dropdown appears:</strong><br>
+            - Check if the CSS is being applied<br>
+            - Look for template rendering issues<br>
+            - Check if *ngIf="isDropdownOpen" is working
+        </div>
+    </div>
+    
+    <p><strong>Once debugging is complete, remember to remove the console.log statements from the component!</strong></p>
+</body>
+</html>

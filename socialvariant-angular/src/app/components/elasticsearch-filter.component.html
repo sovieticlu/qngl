@@ -1,0 +1,840 @@
+<!-- Advanced Angular Book Search Template - Updated for Ant Design 20.0.0 -->
+<div class="search-container">
+    <!-- Header -->
+    <nz-page-header nzTitle="📚 Advanced Angular Book Search"
+        nzSubtitle="Discover books with powerful filtering and search capabilities" class="search-header">
+
+        <!-- Optional breadcrumb for better navigation -->
+        <nz-breadcrumb nz-page-header-breadcrumb>
+            <nz-breadcrumb-item>
+                <a>Home</a>
+            </nz-breadcrumb-item>
+            <nz-breadcrumb-item>
+                <a>Library</a>
+            </nz-breadcrumb-item>
+            <nz-breadcrumb-item>Book Search</nz-breadcrumb-item>
+        </nz-breadcrumb>
+    </nz-page-header>
+
+    <!-- Search Form -->
+    <nz-card [nzBordered]="false" class="search-card">
+        <form [formGroup]="filterForm" class="search-form">
+            <nz-input-group nzSize="large" nzSearch nzEnterButton="Search">
+                <input type="text" nz-input formControlName="searchTerm" placeholder="Search books, authors, topics..."
+                    (keyup.enter)="performSearch()" [nzAutocomplete]="auto" />
+
+                <!-- Auto-complete with improved options -->
+                <nz-autocomplete #auto (selectionChange)="selectSuggestion($event)" nzBackfill>
+                    <nz-auto-option *ngFor="let suggestion of suggestions$ | async" [nzValue]="suggestion.value">
+                        <span [innerHTML]="suggestion.value"></span>
+                    </nz-auto-option>
+                </nz-autocomplete>
+            </nz-input-group>
+
+            <!-- Quick Search Buttons -->
+            <div class="quick-search-buttons">
+                <div nz-button-group>
+                    <button nz-button nzType="default" (click)="quickSearch('fiction')">
+                        <span nz-icon nzType="book"></span>
+                        Fiction
+                    </button>
+                    <button nz-button nzType="default" (click)="quickSearch('non-fiction')">
+                        <span nz-icon nzType="file-text"></span>
+                        Non-Fiction
+                    </button>
+                    <button nz-button nzType="default" (click)="quickSearch('bestsellers')">
+                        <span nz-icon nzType="star"></span>
+                        Bestsellers
+                    </button>
+                </div>
+            </div>
+        </form>
+    </nz-card>
+
+    <nz-layout class="main-layout">
+        <!-- Filters Sidebar -->
+        <nz-card>
+            <nz-sider nzWidth="400" nzTheme="light" class="filters-sidebar" [nzCollapsible]="true"
+                [nzCollapsed]="isCollapsed" (nzCollapsedChange)="onCollapsedChange($event)">
+
+                <nz-card nzTitle="🔧 Advanced Filters" [nzBordered]="false" class="filters-card">
+                    <!-- Stats with improved design -->
+                    <nz-row [nzGutter]="16" class="stats-section">
+                        <nz-col span="12">
+                            <nz-statistic nzTitle="Books Found" [nzValue]="(searchResults$ | async)?.totalCount || 0"
+                                [nzValueStyle]="{ color: '#1677ff' }" nzPrefix="📖">
+                            </nz-statistic>
+                        </nz-col>
+                        <nz-col span="12">
+                            <nz-statistic nzTitle="Avg Rating" [nzValue]="(searchResults$ | async)?.averageRating || 0"
+                                [nzValueStyle]="{ color: '#faad14' }" nzSuffix="⭐">
+                            </nz-statistic>
+                        </nz-col>
+                    </nz-row>
+
+                    <nz-divider></nz-divider>
+
+                    <!-- Sort Controls with improved UX -->
+                    <nz-space nzDirection="vertical" nzSize="middle" class="filter-section">
+                        <div nz-space-item>
+                            <h4><span nz-icon nzType="sort-ascending"></span> Sort By</h4>
+                            <nz-select nzShowSearch nzPlaceHolder="Select sort option" formControlName="sortBy"
+                                class="full-width" nzAllowClear>
+                                <nz-option nzValue="relevance" nzLabel="🎯 Relevance"></nz-option>
+                                <nz-option nzValue="title" nzLabel="🔤 Title A-Z"></nz-option>
+                                <nz-option nzValue="price" nzLabel="💰 Price"></nz-option>
+                                <nz-option nzValue="rating" nzLabel="⭐ Rating"></nz-option>
+                                <nz-option nzValue="date" nzLabel="📅 Publication Date"></nz-option>
+                            </nz-select>
+                        </div>
+
+                        <div nz-space-item>
+                            <nz-segmented formControlName="sortOrder" [nzOptions]="sortOrderOptions">
+                            </nz-segmented>
+                        </div>
+                    </nz-space>
+
+                    <nz-divider></nz-divider>
+
+                    <!-- Price Range with improved slider -->
+                    <div class="filter-section">
+                        <h4><span nz-icon nzType="pound-circle"></span> Price Range</h4>
+                        <nz-slider nzRange [nzMin]="0" [nzMax]="100" [nzDefaultValue]="[0, 100]"
+                            [nzTipFormatter]="priceFormatter" (nzOnAfterChange)="onPriceRangeChange($event)"
+                            [nzMarks]="priceMarks">
+                        </nz-slider>
+                        <nz-space class="price-display">
+                            <div nz-space-item>
+                                <nz-tag nzColor="green">£{{ priceRange[0] }}</nz-tag>
+                            </div>
+                            <div nz-space-item>-</div>
+                            <div nz-space-item>
+                                <nz-tag nzColor="blue">£{{ priceRange[1] }}</nz-tag>
+                            </div>
+                        </nz-space>
+                    </div>
+
+                    <nz-divider></nz-divider>
+
+                    <!-- Rating Filter with improved design -->
+                    <div class="filter-section">
+                        <h4><span nz-icon nzType="star"></span> Minimum Rating</h4>
+                        <nz-rate [nzAllowHalf]="true" [ngModel]="minRating" (ngModelChange)="onRatingChange($event)"
+                            [nzTooltips]="ratingTooltips">
+                        </nz-rate>
+                        <nz-tag nzColor="gold" class="rating-display">{{ minRating }}+ stars</nz-tag>
+                    </div>
+
+                    <nz-divider></nz-divider>
+
+                    <!-- Date Range with improved picker -->
+                    <div class="filter-section">
+                        <h4><span nz-icon nzType="calendar"></span> Publication Date</h4>
+                        <nz-range-picker formControlName="dateRange" class="full-width" [nzShowTime]="false"
+                            nzFormat="yyyy-MM-dd">
+                        </nz-range-picker>
+                    </div>
+
+                    <nz-divider></nz-divider>
+
+                    <!-- Advanced Filters Section with improved collapse -->
+                    <nz-collapse nzAccordion [nzBordered]="false">
+                        <nz-collapse-panel nzHeader="🎯 Advanced Filters" nzActive [nzExtra]="extraTemplate">
+
+                            <ng-template #extraTemplate>
+                                <span nz-icon nzType="setting" (click)="$event.stopPropagation();"></span>
+                            </ng-template>
+
+                            <nz-space nzDirection="vertical" nzSize="middle">
+                                <!-- Saisine Type -->
+                                <div nz-space-item>
+                                    <div class="filter-section">
+                                        <h4><span nz-icon nzType="file-text"></span> Saisine Type</h4>
+                                        <nz-select nzShowSearch nzPlaceHolder="Select saisine type"
+                                            formControlName="saisine_type" class="full-width" nzAllowClear
+                                            [nzMaxTagCount]="2" [nzMaxTagPlaceholder]="maxTagPlaceholderTemplate">
+                                            <nz-option *ngFor="let option of getSaisineTypesArray()"
+                                                [nzValue]="option.key"
+                                                [nzLabel]="option.key + ' (' + option.count + ')'">
+                                            </nz-option>
+                                        </nz-select>
+                                        <ng-template #maxTagPlaceholderTemplate let-selectedList>
+                                            + {{ selectedList.length }} more
+                                        </ng-template>
+                                    </div>
+                                </div>
+
+                                <!-- Saisine Backlog Type -->
+                                <div nz-space-item>
+                                    <div class="filter-section">
+                                        <h4><span nz-icon nzType="file-search"></span> Saisine Backlog Type</h4>
+                                        <nz-select nzShowSearch nzPlaceHolder="Select backlog type"
+                                            formControlName="saisine_backlog_type" class="full-width" nzAllowClear>
+                                            <nz-option *ngFor="let option of getSaisineBacklogTypesArray()"
+                                                [nzValue]="option.key"
+                                                [nzLabel]="option.key + ' (' + option.count + ')'">
+                                            </nz-option>
+                                        </nz-select>
+                                    </div>
+                                </div>
+
+                                <!-- Meeting Type -->
+                                <div nz-space-item>
+                                    <div class="filter-section">
+                                        <h4><span nz-icon nzType="team"></span> Meeting Type</h4>
+                                        <nz-select nzShowSearch nzPlaceHolder="Select meeting type"
+                                            formControlName="meeting_type" class="full-width" nzAllowClear>
+                                            <nz-option *ngFor="let option of getMeetingTypesArray()"
+                                                [nzValue]="option.key"
+                                                [nzLabel]="option.key + ' (' + option.count + ')'">
+                                            </nz-option>
+                                        </nz-select>
+                                    </div>
+                                </div>
+
+                                <!-- Decision Type (Fixed duplicate) -->
+                                <div nz-space-item>
+                                    <div class="filter-section">
+                                        <h4><span nz-icon nzType="check-circle"></span> Decision Type</h4>
+                                        <nz-select nzShowSearch nzPlaceHolder="Select decision type"
+                                            formControlName="decision_type" class="full-width" nzAllowClear>
+                                            <nz-option *ngFor="let option of getDecisionTypesArray()"
+                                                [nzValue]="option.key"
+                                                [nzLabel]="option.key + ' (' + option.count + ')'">
+                                            </nz-option>
+                                        </nz-select>
+                                    </div>
+                                </div>
+
+                                <!-- FDR Type (Fixed duplicate) -->
+                                <div nz-space-item>
+                                    <div class="filter-section">
+                                        <h4><span nz-icon nzType="file-done"></span> FDR Type</h4>
+                                        <nz-select nzShowSearch nzPlaceHolder="Select FDR type"
+                                            formControlName="fdr_type" class="full-width" nzAllowClear>
+                                            <nz-option *ngFor="let option of getFdrTypesArray()" [nzValue]="option.key"
+                                                [nzLabel]="option.key + ' (' + option.count + ')'">
+                                            </nz-option>
+                                        </nz-select>
+                                    </div>
+                                </div>
+                            </nz-space>
+                        </nz-collapse-panel>
+                    </nz-collapse>
+
+                    <nz-divider></nz-divider>
+
+                    <!-- Topics Filter with improved checkbox group -->
+                    <div class="filter-section" *ngIf="aggregations as agg">
+                        <h4><span nz-icon nzType="tags"></span> Topics</h4>
+                        <nz-checkbox-wrapper (nzOnChange)="onTopicsChange($event)">
+                            <nz-row>
+                                <nz-col *ngFor="let topic of getTopicsCheckboxOptions(agg.topics)" span="24">
+                                    <label nz-checkbox [nzValue]="topic.value"
+                                        [nzChecked]="selectedTopics.includes(topic.value)">
+                                        {{ topic.label }}
+                                        <nz-badge [nzCount]="topic.count" [nzOverflowCount]="999" nzSize="small"
+                                            nzColor="blue">
+                                        </nz-badge>
+                                    </label>
+                                </nz-col>
+                            </nz-row>
+                        </nz-checkbox-wrapper>
+                    </div>
+
+                    <nz-divider></nz-divider>
+
+                    <!-- Authors Filter with improved design -->
+                    <div class="filter-section" *ngIf="aggregations as agg">
+                        <h4><span nz-icon nzType="user"></span> Authors</h4>
+                        <nz-select nzMode="multiple" nzShowSearch nzPlaceHolder="Select authors"
+                            [(ngModel)]="selectedAuthors" (ngModelChange)="onAuthorsChange($event)" class="full-width"
+                            [nzMaxTagCount]="3" [nzMaxTagPlaceholder]="maxTagPlaceholderTemplate">
+                            <nz-option *ngFor="let author of getAuthorsCheckboxOptions(agg.authors)"
+                                [nzValue]="author.value" [nzLabel]="author.label + ' (' + author.count + ')'">
+                            </nz-option>
+                        </nz-select>
+                        <ng-template #maxTagPlaceholderTemplate let-selectedList>
+                            + {{ selectedList.length }} more authors
+                        </ng-template>
+                    </div>
+
+                    <nz-divider></nz-divider>
+
+                    <!-- Format Filter with improved segmented control -->
+                    <div class="filter-section" *ngIf="aggregations as agg">
+                        <h4><span nz-icon nzType="book"></span> Format</h4>
+                        <nz-segmented formControlName="format" [nzOptions]="getFormatSegmentedOptions(agg.formats)"
+                            [nzSize]="'large'">
+                        </nz-segmented>
+                    </div>
+
+                    <nz-divider></nz-divider>
+
+                    <!-- Publisher Filter -->
+                    <div class="filter-section" *ngIf="aggregations as agg">
+                        <h4><span nz-icon nzType="home"></span> Publisher</h4>
+                        <nz-select nzShowSearch nzPlaceHolder="Select publisher" formControlName="publisher"
+                            class="full-width" nzAllowClear [nzFilterOption]="publisherFilterOption">
+                            <nz-option *ngFor="let pub of getPublishersArray(agg.publishers)" [nzValue]="pub.key"
+                                [nzLabel]="pub.key + ' (' + pub.count + ')'">
+                            </nz-option>
+                        </nz-select>
+                    </div>
+
+                    <nz-divider></nz-divider>
+
+                    <!-- Active Filters with improved design -->
+                    <div class="filter-section" *ngIf="hasActiveFilters()">
+                        <h4><span nz-icon nzType="filter"></span> Active Filters</h4>
+                        <nz-space nzWrap class="active-filters">
+                            <ng-container *ngFor="let topic of selectedTopics">
+                                <nz-tag nzColor="blue" nzClosable (nzOnClose)="removeTopicFilter(topic)">
+                                    <span nz-icon nzType="tag"></span>
+                                    {{ topic }}
+                                </nz-tag>
+                            </ng-container>
+                            <ng-container *ngFor="let author of selectedAuthors">
+                                <nz-tag nzColor="green" nzClosable (nzOnClose)="removeAuthorFilter(author)">
+                                    <span nz-icon nzType="user"></span>
+                                    {{ author }}
+                                </nz-tag>
+                            </ng-container>
+                            <ng-container>
+                                <a nz-typography nzType="danger" (click)="clearAllFilters()" class="clear-all-link">
+                                    <span nz-icon nzType="clear"></span>
+                                    Clear All
+                                </a>
+                            </ng-container>
+                        </nz-space>
+                    </div>
+
+                    <nz-divider></nz-divider>
+
+                    <!-- OPTION 1: Filter Presets using Modal Dialog (Recommended) -->
+                    <div class="filter-section">
+                        <h4><span nz-icon nzType="save"></span> Filter Presets</h4>
+                        <nz-space>
+                            <div nz-space-item>
+                                <a nz-typography nzType="secondary" (click)="saveFilterPreset()" class="preset-link">
+                                    <span nz-icon nzType="save"></span>
+                                    Save Preset
+                                </a>
+                            </div>
+                            <div nz-space-item>
+                                <a nz-typography nzType="secondary" (click)="openPresetsModal()" class="preset-link">
+                                    <span nz-icon nzType="folder-open"></span>
+                                    Manage Presets
+                                </a>
+                            </div>
+                        </nz-space>
+                    </div>
+
+                    <!-- OPTION 2: Using Auto-Complete Alternative -->
+                    <div class="filter-section" style="margin-top: 16px;">
+                        <h4><span nz-icon nzType="thunderbolt"></span> Quick Load Preset</h4>
+                        <!-- <nz-auto-complete [nzDataSource]="presetOptions" (nzOnSelect)="loadFilterPreset($event)"
+                            nzPlaceHolder="Type to search presets...">
+                            <input nz-input [(ngModel)]="presetSearchValue" />
+                        </nz-auto-complete> -->
+                        <!-- Option 1: Native HTML5 datalist -->
+                        <input list="preset-options" [(ngModel)]="presetSearchValue"
+                            placeholder="Type to search presets..." (change)="saveFilterPreset()">
+                        <datalist id="preset-options">
+                            <option *ngFor="let option of presetOptions" [value]="option">
+                        </datalist>
+
+                        <!-- Option 2: Custom dropdown with Angular Material -->
+                        <!-- <mat-form-field>
+                            <mat-label>Search presets</mat-label>
+                            <input matInput [(ngModel)]="presetSearchValue" placeholder="Type to search presets..." [matAutocomplete]="auto">
+                            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="loadFilterPreset($event.option.value)">
+                                <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+                                    {{option}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field> -->
+
+                        <!-- Option 3: Bootstrap with custom filtering -->
+                        <div class="dropdown">
+                            <input type="text" class="form-control dropdown-toggle" [(ngModel)]="presetSearchValue"
+                                placeholder="Type to search presets..." (input)="filterPresets($event)"
+                                data-bs-toggle="dropdown">
+                            <ul class="dropdown-menu" [class.show]="showDropdown">
+                                <li *ngFor="let option of filteredPresets">
+                                    <a class="dropdown-item" href="#" (click)="loadFilterPreset(option)">{{option}}</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Option 4: Custom implementation with pure CSS/Angular -->
+                        <div class="custom-autocomplete">
+                            <input type="text" [(ngModel)]="presetSearchValue" placeholder="Type to search presets..."
+                                (input)="onInputChange($event)" (focus)="showSuggestions = true"
+                                (blur)="hideSuggestions()" class="form-control">
+
+                            <div class="suggestions" *ngIf="showSuggestions && filteredPresets.length > 0">
+                                <div *ngFor="let option of filteredPresets" class="suggestion-item"
+                                    (mousedown)="selectOption(option)">
+                                    {{option}}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Option 5: PrimeNG AutoComplete -->
+                        <!-- <p-autoComplete [(ngModel)]="presetSearchValue" [suggestions]="filteredPresets"
+                            (completeMethod)="filterPresets($event)" (onSelect)="loadFilterPreset($event)"
+                            placeholder="Type to search presets...">     </p-autoComplete> -->
+
+                        <!-- Option 6: ng-select with search -->
+                        <select [(ngModel)]="presetSearchValue"
+                            placeholder="Type to search presets..."
+                            (change)="loadFilterPreset($event)">
+                            <option *ngFor="let option of presetOptions" [value]="option">{{ option }}</option>
+                        </select>
+                    </div>
+
+                    <!-- OPTION 3: Using Clickable Cards Alternative -->
+                    <div class="filter-section" style="margin-top: 16px;" *ngIf="savedPresets.length > 0">
+                        <h4><span nz-icon nzType="star"></span> Saved Presets</h4>
+                        <nz-space nzWrap>
+                            <div nz-space-item *ngFor="let preset of savedPresets.slice(0, 3)">
+                                <nz-card nzSize="small" [nzTitle]="preset.name" [nzHoverable]="true"
+                                    (click)="loadFilterPreset(preset)" class="preset-card">
+                                    <div class="preset-card-content">
+                                        <span nz-icon [nzType]="preset.icon || 'star'"></span>
+                                        <span class="preset-filters">{{ preset.filterCount }} filters</span>
+                                    </div>
+                                </nz-card>
+                            </div>
+                            <div nz-space-item *ngIf="savedPresets.length > 3">
+                                <nz-card nzSize="small" nzTitle="More Presets" [nzHoverable]="true"
+                                    (click)="openPresetsModal()" class="preset-card more-presets">
+                                    <div class="preset-card-content">
+                                        <span nz-icon nzType="more"></span>
+                                        <span>+{{ savedPresets.length - 3 }} more</span>
+                                    </div>
+                                </nz-card>
+                            </div>
+                        </nz-space>
+                    </div>
+
+                    <!-- OPTION 4: Using Clickable Menu Items -->
+                    <div class="filter-section" style="margin-top: 16px;">
+                        <h4><span nz-icon nzType="appstore"></span> Preset Categories</h4>
+                        <nz-tabset nzType="card" nzSize="small">
+                            <nz-tab nzTitle="Recent">
+                                <ul nz-menu nzMode="vertical" class="preset-menu">
+                                    <li nz-menu-item *ngFor="let preset of getRecentPresets()"
+                                        (click)="loadFilterPreset(preset)">
+                                        <span nz-icon nzType="clock-circle"></span>
+                                        {{ preset.name }}
+                                        <nz-tag nzColor="blue" nzSize="small">{{ preset.filterCount }}</nz-tag>
+                                    </li>
+                                </ul>
+                            </nz-tab>
+                            <nz-tab nzTitle="Favorites">
+                                <ul nz-menu nzMode="vertical" class="preset-menu">
+                                    <li nz-menu-item *ngFor="let preset of getFavoritePresets()"
+                                        (click)="loadFilterPreset(preset)">
+                                        <span nz-icon nzType="heart"></span>
+                                        {{ preset.name }}
+                                        <nz-tag nzColor="red" nzSize="small">{{ preset.filterCount }}</nz-tag>
+                                    </li>
+                                </ul>
+                            </nz-tab>
+                            <nz-tab nzTitle="All">
+                                <ul nz-menu nzMode="vertical" class="preset-menu">
+                                    <li nz-menu-item *ngFor="let preset of savedPresets"
+                                        (click)="loadFilterPreset(preset)">
+                                        <span nz-icon [nzType]="preset.icon || 'star'"></span>
+                                        {{ preset.name }}
+                                        <nz-tag nzColor="default" nzSize="small">{{ preset.filterCount }}</nz-tag>
+                                    </li>
+                                </ul>
+                            </nz-tab>
+                        </nz-tabset>
+                    </div>
+
+                    <!-- OPTION 5: Using Clickable List Items -->
+                    <div class="filter-section" style="margin-top: 16px;">
+                        <h4><span nz-icon nzType="unordered-list"></span> Preset Manager</h4>
+                        <nz-list nzSize="small" [nzDataSource]="savedPresets.slice(0, 5)" nzBordered>
+                            <ng-template #item let-preset>
+                                <nz-list-item [nzActions]="[loadAction, deleteAction]">
+                                    <ng-template #loadAction>
+                                        <a nz-typography nzType="secondary" (click)="loadFilterPreset(preset)"
+                                            nzTitle="Load preset">
+                                            <span nz-icon nzType="play-circle"></span>
+                                            Load
+                                        </a>
+                                    </ng-template>
+                                    <ng-template #deleteAction>
+                                        <a nz-typography nzType="danger" (click)="deleteFilterPreset(preset)"
+                                            nzTitle="Delete preset">
+                                            <span nz-icon nzType="delete"></span>
+                                            Delete
+                                        </a>
+                                    </ng-template>
+                                    <nz-list-item-meta [nzTitle]="preset.name" [nzDescription]="preset.description">
+                                        <nz-avatar slot="avatar" [nzIcon]="preset.icon || 'star'" nzSize="small">
+                                        </nz-avatar>
+                                    </nz-list-item-meta>
+                                </nz-list-item>
+                            </ng-template>
+                        </nz-list>
+                        <div style="text-align: center; margin-top: 8px;" *ngIf="savedPresets.length > 5">
+                            <a nz-typography nzType="secondary" (click)="openPresetsModal()">
+                                View all {{ savedPresets.length }} presets
+                            </a>
+                        </div>
+                    </div>
+
+                </nz-card>
+            </nz-sider>
+        </nz-card>
+    </nz-layout>
+
+    <!-- Modal for Preset Management (for Option 1) -->
+    <nz-modal [(nzVisible)]="isPresetsModalVisible" nzTitle="Manage Filter Presets" [nzFooter]="null" nzWidth="600px"
+        (nzOnCancel)="closePresetsModal()">
+
+        <ng-container *nzModalContent>
+            <nz-table [nzData]="savedPresets" [nzShowPagination]="false">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let preset of savedPresets">
+                        <td>
+                            <span nz-icon [nzType]="preset.icon || 'star'"></span>
+                            {{ preset.name }}
+                            <nz-tag nzColor="blue" *ngIf="preset.isFavorite">Favorite</nz-tag>
+                        </td>
+                        <td>{{ preset.createdAt | date:'short' }}</td>
+                        <td>
+                            <nz-space>
+                                <div nz-space-item>
+                                    <a nz-typography nzType="secondary"
+                                        (click)="loadFilterPreset(preset); closePresetsModal()">
+                                        <span nz-icon nzType="play-circle"></span>
+                                        Load
+                                    </a>
+                                </div>
+                                <div nz-space-item>
+                                    <a nz-typography
+                                        [ngClass]="preset.isFavorite ? 'text-danger' : 'text-secondary'"
+                                        (click)="toggleFavoritePreset(preset)">
+                                        <span nz-icon [nzType]="preset.isFavorite ? 'heart' : 'heart-o'"></span>
+                                        {{ preset.isFavorite ? 'Unfavorite' : 'Favorite' }}
+                                    </a>
+                                </div>
+                                <div nz-space-item>
+                                    <a nz-typography nzType="danger" (click)="deleteFilterPreset(preset)">
+                                        <span nz-icon nzType="delete"></span>
+                                        Delete
+                                    </a>
+                                </div>
+                            </nz-space>
+                        </td>
+                    </tr>
+                </tbody>
+            </nz-table>
+        </ng-container>
+    </nz-modal>
+
+    <!-- Additional CSS for styling -->
+    <style>
+        .preset-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .preset-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .preset-card-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .more-presets {
+            border: 2px dashed #d9d9d9;
+            background: #fafafa;
+        }
+
+        .preset-menu {
+            border: none;
+            background: transparent;
+        }
+
+        .preset-menu li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preset-menu li:hover {
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        .preset-link {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .preset-link:hover {
+            background: #f5f5f5;
+        }
+
+        .clear-all-link {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .clear-all-link:hover {
+            background: #fff2f0;
+        }
+    </style>
+
+    <!-- Results Content -->
+    <nz-content class="results-content">
+        <nz-card [nzBordered]="false" class="results-card">
+
+            <!-- Results Header with improved design -->
+            <div class="results-header" *ngIf="filterForm.get('searchTerm')?.value">
+                <div class="custom-page-header">
+                    <div class="header-content">
+                        <div class="header-main">
+                            <h2 class="header-title">Results for "{{ filterForm.get('searchTerm')?.value }}"</h2>
+                            <p class="header-subtitle">Found {{ (searchResults$ | async)?.totalCount || 0 }} books</p>
+                        </div>
+                        <div class="header-extra">
+                            <nz-space>
+                                <div nz-space-item>
+                                    <nz-badge [nzCount]="(searchResults$ | async)?.totalCount || 0"
+                                        [nzOverflowCount]="9999" nzColor="blue">
+                                        <nz-avatar nzIcon="book" nzSize="small"></nz-avatar>
+                                    </nz-badge>
+                                </div>
+                                <div nz-space-item>
+                                    <nz-radio-group [(ngModel)]="currentViewMode" (ngModelChange)="setViewMode($event)">
+                                        <label nz-radio-button nzValue="grid">
+                                            <span nz-icon nzType="appstore"></span>
+                                            Grid
+                                        </label>
+                                        <label nz-radio-button nzValue="list">
+                                            <span nz-icon nzType="bars"></span>
+                                            List
+                                        </label>
+                                        <label nz-radio-button nzValue="table">
+                                            <span nz-icon nzType="table"></span>
+                                            Table
+                                        </label>
+                                    </nz-radio-group>
+                                </div>
+                            </nz-space>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State with improved spinner -->
+            <div class="loading-container" *ngIf="loading">
+                <nz-spin nzSize="large" nzTip="Searching books..." [nzSpinning]="loading">
+                    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 6 }"></nz-skeleton>
+                </nz-spin>
+            </div>
+
+            <!-- No Results with improved empty state -->
+            <nz-empty *ngIf="!loading && ((searchResults$ | async)?.books?.length === 0) && hasSearched"
+                nzNotFoundImage="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
+                nzNotFoundContent="No books found matching your criteria">
+                <div nz-empty-footer>
+                    <nz-space>
+                        <div nz-space-item>
+                            <a nz-tooltip nzTooltipTitle="Clear all filters" (click)="clearAllFilters()"
+                                class="clear-filters-link">
+                                <span nz-icon nzType="clear"></span>
+                                Clear Filters
+                            </a>
+                        </div>
+                        <div nz-space-item>
+                            <a nz-tooltip nzTooltipTitle="Get suggestions" (click)="suggestAlternatives()"
+                                class="suggest-alternatives-link">
+                                <span nz-icon nzType="bulb"></span>
+                                Suggest Alternatives
+                            </a>
+                        </div>
+                    </nz-space>
+                </div>
+            </nz-empty>
+
+            <!-- Results Grid with improved cards -->
+            <div class="results-grid" *ngIf="!loading && (searchResults$ | async)?.books.length > 0">
+                <nz-list [nzDataSource]="(searchResults$ | async)?.books" [nzGrid]="gridConfig">
+
+                    <nz-list-item *ngFor="let book of (searchResults$ | async)?.books">
+                        <nz-card class="book-card" [nzHoverable]="true"
+                            [nzActions]="[actionSetting, actionEdit, actionEllipsis]">
+
+                            <!-- Card Actions Templates -->
+                            <ng-template #actionSetting>
+                                <span nz-icon nzType="setting" (click)="openBookDetails(book)"></span>
+                            </ng-template>
+                            <ng-template #actionEdit>
+                                <span nz-icon nzType="edit" (click)="editBook(book)"></span>
+                            </ng-template>
+                            <ng-template #actionEllipsis>
+                                <nz-popover nzTitle="More Actions" nzTrigger="click" nzContent>
+                                    <span nz-icon nzType="ellipsis" nz-popover></span>
+                                    <nz-list nzSize="small">
+                                        <nz-list-item (click)="addToWishlist(book)">
+                                            <span nz-icon nzType="heart"></span>
+                                            Add to Wishlist
+                                        </nz-list-item>
+                                        <nz-list-item (click)="shareBook(book)">
+                                            <span nz-icon nzType="share-alt"></span>
+                                            Share
+                                        </nz-list-item>
+                                        <nz-list-item (click)="reportBook(book)">
+                                            <span nz-icon nzType="flag"></span>
+                                            Report
+                                        </nz-list-item>
+                                    </nz-list>
+                                </nz-popover>
+                            </ng-template>
+
+                            <nz-card-meta [nzTitle]="book.title"
+                                [nzDescription]="(book['detailed description'] && (book['detailed description'] | slice:0:100)) || ''">
+                                <nz-avatar nz-card-meta-avatar nzIcon="book" [nzSrc]="book.coverImage" nzSize="large">
+                                </nz-avatar>
+                            </nz-card-meta>
+
+                            <div class="book-content">
+                                <nz-descriptions nzBordered nzSize="small"
+                                    [nzColumn]="{ xs: 1, sm: 2, md: 2, lg: 2, xl: 2, xxl: 2 }">
+
+                                    <nz-descriptions-item nzTitle="Authors" [nzSpan]="2">
+                                        <nz-space nzWrap>
+                                            <ng-container *ngFor="let author of book.authors">
+                                                <nz-tag nzColor="geekblue" (click)="searchByAuthor(author)">
+                                                    <span nz-icon nzType="user"></span>
+                                                    {{ author }}
+                                                </nz-tag>
+                                            </ng-container>
+                                        </nz-space>
+                                    </nz-descriptions-item>
+
+                                    <nz-descriptions-item nzTitle="Price">
+                                        <nz-statistic [nzValue]="book.price_gbp" nzPrefix="£"
+                                            [nzValueStyle]="{ color: '#52c41a', fontSize: '16px' }">
+                                        </nz-statistic>
+                                    </nz-descriptions-item>
+
+                                    <nz-descriptions-item nzTitle="Rating">
+                                        <nz-space>
+                                            <div nz-space-item>
+                                                <nz-rate [(ngModel)]="book.rating" nzDisabled="true"
+                                                    [nzAllowHalf]="true">
+                                                </nz-rate>
+                                            </div>
+                                            <div nz-space-item>
+                                                <nz-tag nzColor="gold">{{ book.rating }}</nz-tag>
+                                            </div>
+                                        </nz-space>
+                                    </nz-descriptions-item>
+
+                                    <nz-descriptions-item nzTitle="Language">
+                                        <nz-tag nzColor="purple">{{ book.language }}</nz-tag>
+                                    </nz-descriptions-item>
+
+                                    <nz-descriptions-item nzTitle="Publisher">
+                                        <nz-tag nzColor="cyan" (click)="searchByPublisher(book.publisher)">
+                                            {{ book.publisher }}
+                                        </nz-tag>
+                                    </nz-descriptions-item>
+
+                                    <nz-descriptions-item nzTitle="Format">
+                                        <nz-tag [nzColor]="getFormatColor(book.format)">
+                                            {{ book.format }}
+                                        </nz-tag>
+                                    </nz-descriptions-item>
+
+                                    <!-- Advanced fields with improved presentation -->
+                                    <nz-descriptions-item nzTitle="Saisine Type" *ngIf="book.saisine_type">
+                                        <nz-tag nzColor="orange">{{ book.saisine_type }}</nz-tag>
+                                    </nz-descriptions-item>
+
+                                    <nz-descriptions-item nzTitle="Backlog Type" *ngIf="book.saisine_backlog_type">
+                                        <nz-tag nzColor="red">{{ book.saisine_backlog_type }}</nz-tag>
+                                    </nz-descriptions-item>
+
+                                    <nz-descriptions-item nzTitle="Meeting Type" *ngIf="book.meeting_type">
+                                        <nz-tag nzColor="green">{{ book.meeting_type }}</nz-tag>
+                                    </nz-descriptions-item>
+
+                                    <nz-descriptions-item nzTitle="Decision Type" *ngIf="book.decision_type">
+                                        <nz-tag nzColor="blue">{{ book.decision_type }}</nz-tag>
+                                    </nz-descriptions-item>
+
+                                    <nz-descriptions-item nzTitle="FDR Type" *ngIf="book.fdr_type">
+                                        <nz-tag nzColor="magenta">{{ book.fdr_type }}</nz-tag>
+                                    </nz-descriptions-item>
+                                </nz-descriptions>
+
+                                <div class="book-actions">
+                                    <nz-space>
+                                        <div nz-space-item>
+                                            <a nz-tooltip nzTooltipTitle="View book details"
+                                                (click)="viewBookDetails(book)" class="action-link primary-action">
+                                                <span nz-icon nzType="eye"></span>
+                                                View Details
+                                            </a>
+                                        </div>
+                                        <div nz-space-item>
+                                            <a nz-tooltip nzTooltipTitle="Edit book" (click)="editBook(book)"
+                                                class="action-link edit-action">
+                                                <span nz-icon nzType="edit"></span>
+                                                Edit
+                                            </a>
+                                        </div>
+                                        <div nz-space-item>
+                                            <a nz-tooltip nzTooltipTitle="Delete book" (click)="deleteBook(book)"
+                                                class="action-link danger-action">
+                                                <span nz-icon nzType="delete"></span>
+                                                Delete
+                                            </a>
+                                        </div>
+                                    </nz-space>
+                                </div>
+                            </div>
+                        </nz-card>
+                    </nz-list-item>
+                </nz-list>
+            </div>
+        </nz-card>
+    </nz-content>

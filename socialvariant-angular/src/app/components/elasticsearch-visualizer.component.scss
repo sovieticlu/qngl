@@ -1,0 +1,83 @@
+.elasticsearch-dashboard {
+    height: 100vh;
+}
+
+.header-content-demo {
+    background: #1976d2;
+    padding: 1rem 2rem;
+}
+
+.search-section-demo {
+    padding: 2rem;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.search-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.query-search {
+    width: 100%;
+}
+
+.filters-section {
+    width: 100%;
+}
+
+.filter-builder {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.quick-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stats-cards {
+    margin-bottom: 16px;
+}
+
+.document-form {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.document-view {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+::ng-deep .ant-table-tbody>tr>td {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+::ng-deep .ant-descriptions-item-content {
+    word-break: break-word;
+}
