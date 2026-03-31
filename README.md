@@ -1087,5 +1087,5 @@ ORDER BY 1, 2, 3, 4, 5
 
 
 
-
+curl -s -o /tmp/uni_test1.json -w "%{http_code}" -X POST -H "Content-Type: application/json" -d '{"query":"{ pools(first:1, orderBy:volumeUSD, orderDirection:desc) { id token0 { symbol } } }"}' "https://gateway.thegraph.com/api/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV" > /tmp/uni_status1.txt 2>&1
 
