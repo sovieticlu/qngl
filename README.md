@@ -1,3 +1,21 @@
+Saisine (PE_NUMBER)
+├── Language, Status, Type, Format
+├── Organs (main, 1st, 2nd), Working Groups (1st, 2nd)
+├── Courrier Numbers
+├── GEDA Senders / Receivers
+├── Documents
+│   ├── Document Type, Document Language
+│   └── Translations (FDR)
+│       ├── Organ, Doc Type, Meeting Site, Edition Site
+│       └── Translation Languages
+│           └── Language name lookup
+└── Meetings (via PQT_SD)
+    ├── Site, Organ, Meeting Status          ← query 9
+    ├── Points (via PQT_MEETING_POINT)       ← query 10  ★ NEW
+    │   └── Decisions (via PQT_POINT_DECI)   ← query 11  ★ NEW
+    └── Other Saisines on same meeting       ← query 12  ★ NEW
+
+
 -- ================================================================
 -- SAISINE FULL EXPORT — Text output for UI recreation
 -- Run all queries with the same PE_NUMBER value
@@ -238,3 +256,83 @@ FROM PRQ.PQT_LETTER l
     LEFT JOIN PRQ.PQT_SERVICE mo ON mo.SERVICE_ID   = m.SERVICE_ID
 WHERE l.PE_NUMBER = :peNumber
 ORDER BY m.MEETING_DATE;
+
+
+
+-- ┌─────────────────────────────────────────────────────────────┐
+-- │  10. MEETING POINTS                                         │
+-- └─────────────────────────────────────────────────────────────┘
+SELECT
+    '=== MEETING POINTS ===' AS "Section",
+    m.MEETING_ID             AS "Meeting ID",
+    TO_CHAR(m.MEETING_DATE, 'DD/MM/YYYY HH24:MI') AS "Meeting Date",
+    mo.ABBREVIATION || ' - ' || mo.NAME            AS "Meeting Organ",
+    ms.SITE_NAME             AS "Meeting Site",
+    mst.STATUS_VALUE         AS "Meeting Status",
+    mp.POINT_ORDER           AS "Point Order",
+    p.POINT_ID               AS "Point ID",
+    p.REFERENCE              AS "Point Reference",
+    p.TITLE                  AS "Point Title"
+FROM PRQ.PQT_LETTER l
+    JOIN PRQ.PQT_SD sd             ON sd.LETTER_ID    = l.LETTER_ID
+    JOIN PRQ.PQT_MEETING m         ON m.MEETING_ID    = sd.MEETING_ID
+    JOIN PRQ.PQT_MEETING_POINT mp  ON mp.MEETING_ID   = m.MEETING_ID
+    JOIN PRQ.PQT_POINT p           ON p.POINT_ID      = mp.POINT_ID
+    LEFT JOIN PRQ.PQT_SERVICE mo   ON mo.SERVICE_ID    = m.SERVICE_ID
+    LEFT JOIN PRQ.PQT_SITE ms      ON ms.SITE_ID       = m.SITE_ID
+    LEFT JOIN PRQ.PQT_MEETING_STATUS mst ON mst.STATUS_ID = m.STATUS_ID
+WHERE l.PE_NUMBER = :peNumber
+ORDER BY m.MEETING_DATE, mp.POINT_ORDER;
+
+
+-- ┌─────────────────────────────────────────────────────────────┐
+-- │  11. DECISIONS per Point                                    │
+-- └─────────────────────────────────────────────────────────────┘
+SELECT
+    '=== POINT DECISIONS ===' AS "Section",
+    m.MEETING_ID              AS "Meeting ID",
+    TO_CHAR(m.MEETING_DATE, 'DD/MM/YYYY HH24:MI') AS "Meeting Date",
+    p.POINT_ID                AS "Point ID",
+    p.REFERENCE               AS "Point Ref",
+    p.TITLE                   AS "Point Title",
+    pd.DECISION_ORDER         AS "Decision Order",
+    d.DECISION_ID             AS "Decision ID",
+    d.TITLE                   AS "Decision Title",
+    d.LANGUAGE                AS "Decision Language",
+    d.TEXT_LOB                AS "Decision Text"
+FROM PRQ.PQT_LETTER l
+    JOIN PRQ.PQT_SD sd             ON sd.LETTER_ID     = l.LETTER_ID
+    JOIN PRQ.PQT_MEETING m         ON m.MEETING_ID     = sd.MEETING_ID
+    JOIN PRQ.PQT_MEETING_POINT mp  ON mp.MEETING_ID    = m.MEETING_ID
+    JOIN PRQ.PQT_POINT p           ON p.POINT_ID       = mp.POINT_ID
+    JOIN PRQ.PQT_POINT_DECI pd     ON pd.POINT_ID      = p.POINT_ID
+    JOIN PRQ.PQT_DECISION d        ON d.DECISION_ID    = pd.DECISION_ID
+WHERE l.PE_NUMBER = :peNumber
+ORDER BY m.MEETING_DATE, mp.POINT_ORDER, pd.DECISION_ORDER;
+
+
+-- ┌─────────────────────────────────────────────────────────────┐
+-- │  12. OTHER SAISINES on same Meeting Points                  │
+-- │      (shows what else is discussed at same points)          │
+-- └─────────────────────────────────────────────────────────────┘
+SELECT
+    '=== OTHER SAISINES ON SAME MEETINGS ===' AS "Section",
+    m.MEETING_ID              AS "Meeting ID",
+    TO_CHAR(m.MEETING_DATE, 'DD/MM/YYYY HH24:MI') AS "Meeting Date",
+    CASE WHEN sd2.SD_REPORTED = 1 THEN 'Yes' ELSE 'No' END AS "Reported",
+    CASE WHEN sd2.SD_MODIFIED = 1 THEN 'Yes' ELSE 'No' END AS "Modified",
+    CASE WHEN sd2.SD_STOCKED  = 1 THEN 'Yes' ELSE 'No' END AS "Stocked",
+    l2.LETTER_ID              AS "Other Saisine ID",
+    l2.PE_NUMBER              AS "Other PE Number",
+    l2.ECH_NUMBER             AS "Other Ech Number",
+    st2.STATUS_VALUE          AS "Other Status",
+    l2.OBJECT_FR              AS "Other Object FR"
+FROM PRQ.PQT_LETTER l
+    JOIN PRQ.PQT_SD sd             ON sd.LETTER_ID  = l.LETTER_ID
+    JOIN PRQ.PQT_MEETING m         ON m.MEETING_ID  = sd.MEETING_ID
+    JOIN PRQ.PQT_SD sd2            ON sd2.MEETING_ID = m.MEETING_ID
+                                  AND sd2.LETTER_ID != l.LETTER_ID
+    JOIN PRQ.PQT_LETTER l2        ON l2.LETTER_ID   = sd2.LETTER_ID
+    LEFT JOIN PRQ.PQT_STATUS st2  ON st2.STATUS_ID   = l2.STATUS_ID
+WHERE l.PE_NUMBER = :peNumber
+ORDER BY m.MEETING_DATE, l2.PE_NUMBER;
